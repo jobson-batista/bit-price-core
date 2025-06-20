@@ -1,0 +1,36 @@
+# === Sistema Operacional (macOS) ===
+.DS_Store
+
+# === IDEs comuns ===
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+
+# === Maven ===
+/target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# === Gradle ===
+/build/
+.gradle/
+**/out/
+
+# Arquivos de cache e logs
+*.log
+
+# === Arquivos de ambiente ===
+.env
+*.env
+
+# === Arquivos temporários ===
+*.swp
+*.swo
+*.tmp
+*.bak
+*~
+
+# === Test Reports ===
+/test-output/
+
