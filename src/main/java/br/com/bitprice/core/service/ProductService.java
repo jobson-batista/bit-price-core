@@ -1,5 +1,6 @@
 package br.com.bitprice.core.service;
 
+import br.com.bitprice.core.enums.Category;
 import br.com.bitprice.core.exeption.NotFoundException;
 import br.com.bitprice.core.model.Product;
 import br.com.bitprice.core.repository.ProductRepository;
@@ -12,6 +13,8 @@ import java.util.Optional;
 public class ProductService {
 
     private final ProductRepository productRepository;
+
+    private final NotFoundException notFoundException = new NotFoundException("Product Not Found","Check Product the ID entered");
 
     ProductService(ProductRepository productRepository) {
         this.productRepository = productRepository;
@@ -29,7 +32,7 @@ public class ProductService {
     public Product findById(Long id) {
         Optional<Product> product = productRepository.findById(id);
         if(product.isEmpty()) {
-            throw new NotFoundException("Product Not Found","Check Product the ID entered");
+            throw notFoundException;
         }
         return product.orElse(null);
     }
@@ -47,7 +50,7 @@ public class ProductService {
                 product.get().setLink(newProduct.getLink());
             }
         } else {
-            throw new NotFoundException("Product Not Found","Check Product the ID entered");
+            throw notFoundException;
         }
         return productRepository.save(product.get());
     }
@@ -57,7 +60,7 @@ public class ProductService {
         if (product.isPresent()) {
             productRepository.delete(product.get());
         } else {
-            throw new NotFoundException("Product Not Found","Check Product the ID entered");
+            throw notFoundException;
         }
     }
 }

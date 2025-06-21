@@ -1,5 +1,6 @@
 package br.com.bitprice.core.model;
 
+import br.com.bitprice.core.enums.Category;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
@@ -29,6 +30,8 @@ public class Product {
 
     @Column(nullable = false)
     private String link;
+
+    private Category category;
 
     @LastModifiedDate
     private LocalDateTime updatedAt;
