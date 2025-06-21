@@ -3,12 +3,8 @@ package br.com.bitprice.core.service;
 import br.com.bitprice.core.exeption.NotFoundException;
 import br.com.bitprice.core.model.Product;
 import br.com.bitprice.core.repository.ProductRepository;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -54,5 +50,14 @@ public class ProductService {
             throw new NotFoundException("Product Not Found","Check Product the ID entered");
         }
         return productRepository.save(product.get());
+    }
+
+    public void delete(Long id) {
+        Optional<Product> product = productRepository.findById(id);
+        if (product.isPresent()) {
+            productRepository.delete(product.get());
+        } else {
+            throw new NotFoundException("Product Not Found","Check Product the ID entered");
+        }
     }
 }
