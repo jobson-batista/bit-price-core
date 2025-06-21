@@ -1,14 +1,18 @@
-package br.com.bitprice.core.domain.model;
+package br.com.bitprice.core.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Entity
 @Data
-public class ProductPromotion {
+@EntityListeners(AuditingEntityListener.class)
+public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,15 +30,11 @@ public class ProductPromotion {
     @Column(nullable = false)
     private String link;
 
-    private Date updatedAt;
+    @LastModifiedDate
+    private LocalDateTime updatedAt;
 
-    @Column(nullable = false)
-    private Date createdAt;
-
-    @PrePersist
-    public void prePersist() {
-        this.createdAt = new Date();
-    }
+    @CreatedDate
+    private LocalDateTime createdAt;
 
     private boolean isDeleted;
 
