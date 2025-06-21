@@ -1,4 +1,4 @@
-package br.com.bitprice.core.exeption;
+package br.com.bitprice.core.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,5 +1,6 @@
 package br.com.bitprice.core.controller;
 
+import br.com.bitprice.core.dto.ProductDTO;
 import br.com.bitprice.core.model.Product;
 import br.com.bitprice.core.service.ProductService;
 import org.springframework.http.ResponseEntity;
@@ -18,28 +19,33 @@ public class ProductController {
     }
 
     @PostMapping
-    public ResponseEntity<Product> save(@RequestBody  Product product) {
+    public ResponseEntity<ProductDTO> save(@RequestBody  ProductDTO product) {
         return ResponseEntity.ok(productService.save(product));
     }
 
     @GetMapping
-    public ResponseEntity<List<Product>> findAll() {
+    public ResponseEntity<List<ProductDTO>> findAll() {
         return ResponseEntity.ok(productService.findAll());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Product> findById(@PathVariable Long id) {
+    public ResponseEntity<ProductDTO> findById(@PathVariable Long id) {
         return ResponseEntity.ok(productService.findById(id));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Product> update(@PathVariable Long id, @RequestBody Product product) {
+    public ResponseEntity<ProductDTO> update(@PathVariable Long id, @RequestBody Product product) {
         return ResponseEntity.ok(productService.update(id, product));
     }
 
-    @DeleteMapping("{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteById(@PathVariable Long id) {
         productService.delete(id);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/amazon/bestsellers")
+    public ResponseEntity<List<ProductDTO>> findAllBestSellers() {
+        return ResponseEntity.ok(productService.listBestSellers());
     }
 }
