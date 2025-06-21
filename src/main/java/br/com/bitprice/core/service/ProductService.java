@@ -1,11 +1,16 @@
 package br.com.bitprice.core.service;
 
-import br.com.bitprice.core.enums.Category;
-import br.com.bitprice.core.exeption.NotFoundException;
+import br.com.bitprice.core.dto.ProductDTO;
+import br.com.bitprice.core.exception.NotFoundException;
+import br.com.bitprice.core.exception.WebScrapingException;
 import br.com.bitprice.core.model.Product;
 import br.com.bitprice.core.repository.ProductRepository;
+import br.com.bitprice.core.scraping.amazon.AmazonScraperService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,31 +18,43 @@ import java.util.Optional;
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final AmazonScraperService amazonScraperService;
+
+    private static final Logger logger = LoggerFactory.getLogger(ProductService.class);
 
     private final NotFoundException notFoundException = new NotFoundException("Product Not Found","Check Product the ID entered");
 
-    ProductService(ProductRepository productRepository) {
+    ProductService(
+            ProductRepository productRepository,
+            AmazonScraperService amazonScraperService
+    ) {
         this.productRepository = productRepository;
+        this.amazonScraperService = amazonScraperService;
     }
 
-    public List<Product> findAll() {
-        return productRepository.findAll();
+    public List<ProductDTO> findAll() {
+        List<Product> products = this.productRepository.findByDeletedFalse();
+        return fromProductListToProductDTOList(products);
+//        return fromProductListToProductDTOList(productRepository.findAll());
     }
 
-    public Product save(Product product) {
-        product.setDeleted(false);
-        return productRepository.save(product);
+    public ProductDTO save(ProductDTO dto) {
+        return productRepository.save(dto.toProduct()).toDTO();
     }
 
-    public Product findById(Long id) {
+    public void saveAll(List<Product> productList) {
+        productRepository.saveAll(productList);
+    }
+
+    public ProductDTO findById(Long id) {
         Optional<Product> product = productRepository.findById(id);
         if(product.isEmpty()) {
             throw notFoundException;
         }
-        return product.orElse(null);
+        return product.orElse(null).toDTO();
     }
 
-    public Product update(Long id, Product newProduct) {
+    public ProductDTO update(Long id, Product newProduct) {
         Optional<Product> product = productRepository.findById(id);
         if (product.isPresent()) {
             if(newProduct.getTitle() != null && !newProduct.getTitle().isEmpty()) {
@@ -52,7 +69,7 @@ public class ProductService {
         } else {
             throw notFoundException;
         }
-        return productRepository.save(product.get());
+        return productRepository.save(product.get()).toDTO();
     }
 
     public void delete(Long id) {
@@ -62,5 +79,34 @@ public class ProductService {
         } else {
             throw notFoundException;
         }
+    }
+
+    public List<ProductDTO> listBestSellers() {
+        try {
+            List<Product> products = this.amazonScraperService.findBestSellers();
+            productRepository.saveAll(products);
+            logger.info("Best Sellers Products saved!");
+            return fromProductListToProductDTOList(products);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new WebScrapingException();
+        }
+
+    }
+
+    private List<Product> fromProductDTOListToProductList(List<ProductDTO> productDTOList) {
+        List<Product> products = new ArrayList<>();
+        for (ProductDTO productDTO : productDTOList) {
+            products.add(productDTO.toProduct());
+        }
+        return products;
+    }
+
+    private List<ProductDTO> fromProductListToProductDTOList(List<Product> productList) {
+        List<ProductDTO> products = new ArrayList<>();
+        for (Product product : productList) {
+            products.add(product.toDTO());
+        }
+        return products;
     }
 }

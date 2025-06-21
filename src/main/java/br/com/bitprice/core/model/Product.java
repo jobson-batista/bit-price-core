@@ -1,6 +1,8 @@
 package br.com.bitprice.core.model;
 
+import br.com.bitprice.core.dto.ProductDTO;
 import br.com.bitprice.core.enums.Category;
+import br.com.bitprice.core.enums.SourcePlatform;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
@@ -22,16 +24,20 @@ public class Product {
     @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false)
     private String description;
 
-    @Column(nullable = false)
     private BigDecimal price;
 
     @Column(nullable = false)
     private String link;
 
+    private String imageURL;
+
     private Category category;
+
+    private SourcePlatform sourcePlatform;
+
+    private String externalProductId;
 
     @LastModifiedDate
     private LocalDateTime updatedAt;
@@ -39,6 +45,19 @@ public class Product {
     @CreatedDate
     private LocalDateTime createdAt;
 
-    private boolean isDeleted;
+    @Column(name = "deleted")
+    private boolean deleted = false;
 
+    public ProductDTO toDTO() {
+        ProductDTO productDTO = new ProductDTO();
+        productDTO.setTitle(title);
+        productDTO.setDescription(description);
+        productDTO.setPrice(price);
+        productDTO.setLink(link);
+        productDTO.setImageURL(imageURL);
+        productDTO.setCategory(category);
+        productDTO.setUpdatedAt(updatedAt);
+        productDTO.setCreatedAt(createdAt);
+        return productDTO;
+    }
 }
