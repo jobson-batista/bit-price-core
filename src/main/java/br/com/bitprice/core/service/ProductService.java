@@ -84,8 +84,8 @@ public class ProductService {
     public List<ProductDTO> listBestSellers() {
         try {
             List<Product> products = this.amazonScraperService.findBestSellers();
-            productRepository.saveAll(products);
-            logger.info("Best Sellers Products saved!");
+            products = productRepository.saveAll(products);
+            logger.info("Amazon Best Sellers Products saved!");
             return fromProductListToProductDTOList(products);
         } catch (Exception e) {
             e.printStackTrace();

@@ -31,6 +31,7 @@ public class Product {
     @Column(nullable = false)
     private String link;
 
+    @Column(name = "image_url")
     private String imageURL;
 
     private Category category;
@@ -50,12 +51,15 @@ public class Product {
 
     public ProductDTO toDTO() {
         ProductDTO productDTO = new ProductDTO();
+        productDTO.setId(id);
         productDTO.setTitle(title);
         productDTO.setDescription(description);
         productDTO.setPrice(price);
         productDTO.setLink(link);
         productDTO.setImageURL(imageURL);
         productDTO.setCategory(category);
+        productDTO.setSourcePlatform(sourcePlatform);
+        productDTO.setExternalProductId(externalProductId);
         productDTO.setUpdatedAt(updatedAt);
         productDTO.setCreatedAt(createdAt);
         return productDTO;
