@@ -1,6 +1,7 @@
 package br.com.bitprice.core.dto;
 
 import br.com.bitprice.core.enums.Category;
+import br.com.bitprice.core.enums.SourcePlatform;
 import br.com.bitprice.core.model.Product;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -26,6 +27,8 @@ public class ProductDTO {
     private String link;
     private String imageURL;
     private Category category;
+    private SourcePlatform sourcePlatform;
+    private String externalProductId;
     private LocalDateTime updatedAt;
     private LocalDateTime createdAt;
 
@@ -38,6 +41,8 @@ public class ProductDTO {
         product.setLink(this.link);
         product.setImageURL(this.imageURL);
         product.setCategory(this.category);
+        product.setSourcePlatform(this.sourcePlatform);
+        product.setExternalProductId(this.externalProductId);
         product.setUpdatedAt(this.updatedAt);
         product.setCreatedAt(this.createdAt);
         return product;

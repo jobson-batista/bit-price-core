@@ -21,8 +21,8 @@ public class AmazonScraperScheduler {
         this.productService = productService;
     }
 
-    @Scheduled(cron = "0 25 20 * * *") // sec min h dayMon mon weekday
-    public void runAmazonScraper() {
+    @Scheduled(cron = "0 0 04 * * *") // sec min h dayMon mon weekday
+    public void runAmazonBestSellersScraper() {
         List<Product> products = amazonScraperService.findBestSellers();
         if (!products.isEmpty()) {
             productService.saveAll(products);

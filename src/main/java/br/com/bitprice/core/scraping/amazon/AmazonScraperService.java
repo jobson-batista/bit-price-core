@@ -2,6 +2,7 @@ package br.com.bitprice.core.scraping.amazon;
 
 import br.com.bitprice.core.enums.Category;
 import br.com.bitprice.core.enums.SourcePlatform;
+import br.com.bitprice.core.exception.NotFoundException;
 import br.com.bitprice.core.model.Product;
 import br.com.bitprice.core.scraping.ScraperFactory;
 import org.openqa.selenium.By;
@@ -26,6 +27,8 @@ public class AmazonScraperService implements ScraperFactory {
     @Value("${amazon.tagname}")
     private String tagName;
 
+    private final String URL_BEST_SELLERS = "https://www.amazon.com.br/gp/bestsellers/videogames?pg=";
+
     private static final Logger logger = LoggerFactory.getLogger(AmazonScraperService.class);
 
     public List<Product> findBestSellers() {
@@ -38,26 +41,16 @@ public class AmazonScraperService implements ScraperFactory {
         options.addArguments("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36");
         options.setExperimentalOption("excludeSwitches", List.of("enable-automation"));
         options.setExperimentalOption("useAutomationExtension", false);
-        options.addArguments("--window-size=1920,1080");
+        options.addArguments("--start-maximized");
         options.addArguments("--headless=new"); // "new" reduz detecção no Chrome mais novo
 
         try {
             int pages = 2;
             for (int i = 1; i <= pages; i++) {
 
-                driver.get("https://www.amazon.com.br/gp/bestsellers/videogames?pg=" + i);
+                driver.get(URL_BEST_SELLERS + i);
 
-                Thread.sleep(5000);
-
-                JavascriptExecutor js = (JavascriptExecutor) driver;
-
-                for (int k = 0; k < 10; k++) {
-                    js.executeScript("window.scrollBy(0,800)");
-                    Thread.sleep(1000 + new Random().nextInt(1000)); // 1000ms a 2000ms
-                }
-
-                js.executeScript("window.scrollTo(0, document.body.scrollHeight);");
-                Thread.sleep(5000);
+                scroll(driver);
 
                 List<WebElement> itens = driver.findElements(By.id("gridItemRoot"));
 
@@ -77,11 +70,12 @@ public class AmazonScraperService implements ScraperFactory {
                     product.setImageURL(imageUrl != null ? imageUrl.trim() : null);
                     product.setCategory(Category.GAMES);
                     product.setSourcePlatform(SourcePlatform.AMAZON);
+                    product.setExternalProductId(getExternalProductId(item));
+
                     if(!price.isEmpty()) {
                         product.setPrice(new BigDecimal(price));
                     }
                     products.add(product);
-                    logger.info(String.format("Product Found: %s", product.getTitle()));
                 }
             }
         } catch (InterruptedException e) {
@@ -91,5 +85,32 @@ public class AmazonScraperService implements ScraperFactory {
         }
 
         return products;
+    }
+
+    private String getExternalProductId(WebElement item) {
+        String asin = "";
+        List<WebElement> divs = item.findElements(By.cssSelector("div[data-asin]"));
+        for (WebElement div : divs) {
+            asin = div.getAttribute("data-asin");
+            if (asin != null && !asin.isEmpty()) {
+                logger.info("ASIN encontrado: " + asin);
+            }
+        }
+        return asin;
+    }
+
+    private void scroll(WebDriver driver) throws InterruptedException {
+
+        Thread.sleep(5000);
+
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+
+        for (int k = 0; k < 10; k++) {
+            js.executeScript("window.scrollBy(0,800)");
+            Thread.sleep(1000 + new Random().nextInt(1000)); // 1000ms a 2000ms
+        }
+
+        js.executeScript("window.scrollTo(0, document.body.scrollHeight);");
+        Thread.sleep(5000);
     }
 }
