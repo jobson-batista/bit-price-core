@@ -2,15 +2,14 @@ package br.com.bitprice.core.scraping.amazon;
 
 import br.com.bitprice.core.enums.Category;
 import br.com.bitprice.core.enums.SourcePlatform;
-import br.com.bitprice.core.exception.NotFoundException;
 import br.com.bitprice.core.model.Product;
 import br.com.bitprice.core.scraping.ScraperFactory;
+import br.com.bitprice.core.scraping.config.JavascriptExecutorConfig;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,27 +26,20 @@ public class AmazonScraperService implements ScraperFactory {
     @Value("${amazon.tagname}")
     private String tagName;
 
-    private final String URL_BEST_SELLERS = "https://www.amazon.com.br/gp/bestsellers/videogames?pg=";
-
     private static final Logger logger = LoggerFactory.getLogger(AmazonScraperService.class);
+
+    private final JavascriptExecutorConfig executor = new JavascriptExecutorConfig();
 
     public List<Product> findBestSellers() {
         List<Product> products = new ArrayList<>();
         WebDriver driver = new ChromeDriver();
-        ((JavascriptExecutor) driver).executeScript(
-                "Object.defineProperty(navigator, 'webdriver', {get: () => undefined})"
-        );
-        ChromeOptions options = new ChromeOptions();
-        options.addArguments("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36");
-        options.setExperimentalOption("excludeSwitches", List.of("enable-automation"));
-        options.setExperimentalOption("useAutomationExtension", false);
-        options.addArguments("--start-maximized");
-        options.addArguments("--headless=new"); // "new" reduz detecção no Chrome mais novo
+        setupDriver(driver);
 
         try {
             int pages = 2;
             for (int i = 1; i <= pages; i++) {
 
+                String URL_BEST_SELLERS = "https://www.amazon.com.br/gp/bestsellers/videogames?pg=";
                 driver.get(URL_BEST_SELLERS + i);
 
                 scroll(driver);
@@ -56,9 +48,9 @@ public class AmazonScraperService implements ScraperFactory {
 
                 for (WebElement item : itens) {
                     Product product = new Product();
-                    String title = item.findElement(By.tagName("img")).getAttribute("alt");
-                    String link = item.findElement(By.tagName("a")).getAttribute("href");
-                    String imageUrl = item.findElement(By.tagName("img")).getAttribute("src");
+                    String title = item.findElement(By.tagName("img")).getDomAttribute("alt");
+                    String link = item.findElement(By.tagName("a")).getDomAttribute("href");
+                    String imageUrl = item.findElement(By.tagName("img")).getDomAttribute("src");
                     String price = "";
                     for (WebElement span : item.findElements(By.tagName("span"))) {
                         if(span.getText().contains("R$")) {
@@ -112,5 +104,9 @@ public class AmazonScraperService implements ScraperFactory {
 
         js.executeScript("window.scrollTo(0, document.body.scrollHeight);");
         Thread.sleep(5000);
+    }
+
+    private void setupDriver(WebDriver driver){
+        executor.JSExecutor((JavascriptExecutor) driver);
     }
 }

@@ -45,7 +45,12 @@ public class ProductController {
     }
 
     @GetMapping("/amazon/bestsellers")
-    public ResponseEntity<List<ProductDTO>> findAllBestSellers() {
-        return ResponseEntity.ok(productService.listBestSellers());
+    public ResponseEntity<List<ProductDTO>> findAllBestSellersAmazon() {
+        return ResponseEntity.ok(productService.listBestSellersAmazon());
+    }
+
+    @GetMapping("/kabum/bestsellers")
+    public ResponseEntity<List<ProductDTO>> findAllBestSellersKabum() {
+        return ResponseEntity.ok(productService.listBestSellersKabum());
     }
 }

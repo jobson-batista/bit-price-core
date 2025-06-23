@@ -6,6 +6,7 @@ import br.com.bitprice.core.exception.WebScrapingException;
 import br.com.bitprice.core.model.Product;
 import br.com.bitprice.core.repository.ProductRepository;
 import br.com.bitprice.core.scraping.amazon.AmazonScraperService;
+import br.com.bitprice.core.scraping.kabum.KabumScraperService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final AmazonScraperService amazonScraperService;
+    private final KabumScraperService kabumScraperService;
 
     private static final Logger logger = LoggerFactory.getLogger(ProductService.class);
 
@@ -26,10 +28,12 @@ public class ProductService {
 
     ProductService(
             ProductRepository productRepository,
-            AmazonScraperService amazonScraperService
+            AmazonScraperService amazonScraperService,
+            KabumScraperService kabumScraperService
     ) {
         this.productRepository = productRepository;
         this.amazonScraperService = amazonScraperService;
+        this.kabumScraperService = kabumScraperService;
     }
 
     public List<ProductDTO> findAll() {
@@ -81,7 +85,7 @@ public class ProductService {
         }
     }
 
-    public List<ProductDTO> listBestSellers() {
+    public List<ProductDTO> listBestSellersAmazon() {
         try {
             List<Product> products = this.amazonScraperService.findBestSellers();
             products = productRepository.saveAll(products);
@@ -91,7 +95,18 @@ public class ProductService {
             e.printStackTrace();
             throw new WebScrapingException();
         }
+    }
 
+    public List<ProductDTO> listBestSellersKabum() {
+        try {
+            List<Product> products = this.kabumScraperService.findBestSellers();
+            products = productRepository.saveAll(products);
+            logger.info("Kabum Best Sellers Products saved!");
+            return fromProductListToProductDTOList(products);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new WebScrapingException();
+        }
     }
 
     private List<Product> fromProductDTOListToProductList(List<ProductDTO> productDTOList) {
