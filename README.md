@@ -21,14 +21,6 @@ spring.jpa.hibernate.ddl-auto=update
 
 2. Execute a aplicação:
 
-### Com Maven:
-
-```bash
-./mvnw spring-boot:run
-```
-
-### Com Gradle:
-
 ```bash
 ./gradlew bootRun
 ```
